@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   Button,
   Modal,
@@ -14,14 +14,28 @@ import {
 } from 'react-native';
 import DatePicker from 'react-native-date-picker';
 
-const Formulario = ({modalVisible, setModalVisible, setPacientes, pacientes}) => {
+const Formulario = ({modalVisible, setModalVisible, setPacientes, pacientes, pacienteEdit,setPacienteEdit}) => {
 
   const [paciente, setPaciente] = useState('');
+  const [id, setId] = useState('');
   const [propietario, setPropietario] = useState('');
   const [telefono, setTelefono] = useState('');
   const [fecha, setFecha] = useState(new Date());
   const [email, setEmail] = useState('');
   const [sintomas, setSintomas] = useState('');
+
+  useEffect(() => {
+      if (Object.keys(pacienteEdit).length > 0) {
+         setId(pacienteEdit.id);
+         setEmail(pacienteEdit.email);
+         setFecha(pacienteEdit.fecha);
+         setTelefono(pacienteEdit.telefono);
+         setPaciente(pacienteEdit.paciente);
+         setPropietario(pacienteEdit.propietario);
+         setSintomas(pacienteEdit.sintomas);
+        console.log("si hay algo",pacienteEdit)
+      }
+  }, [pacienteEdit]);
 
   const handleCita = () => {
     //validar
@@ -30,16 +44,29 @@ const Formulario = ({modalVisible, setModalVisible, setPacientes, pacientes}) =>
       return;
     }
     const nuevoPaciente = {
-        id: Date.now(),
-        paciente,
-        propietario,
-        fecha,
-        telefono,
-        email,
-        sintomas,
-    };
-    setPacientes([...pacientes, nuevoPaciente]);
+      id: Date.now(),
+      paciente,
+      propietario,
+      fecha,
+      telefono,
+      email,
+      sintomas,
+  };
+    //Revisar si es un registro nuevo o edición
+    if (id){
+      nuevoPaciente.id = id;
+      const pacientesEditados = pacientes.map(pacienteState => pacienteState.id === nuevoPaciente.id ? nuevoPaciente : pacienteState)
+      setPacientes(pacientesEditados);
+      setPacienteEdit({});
+
+    } else {
+      nuevoPaciente.id = Date.now();
+      setPacientes([...pacientes, nuevoPaciente]);
+
+    }
+
     setModalVisible(!modalVisible);
+    setId('');
     setPaciente('');
     setPropietario('');
     setTelefono('');
@@ -52,12 +79,21 @@ const Formulario = ({modalVisible, setModalVisible, setPacientes, pacientes}) =>
     <Modal animationType="slide" visible={modalVisible}>
       <SafeAreaView style={styles.contenid}>
         <ScrollView>
-          <Text style={styles.titulo}>
-            Nueva <Text style={styles.tituloBold}>Cita</Text>
+          <Text style={styles.titulo}>{pacienteEdit.id ? 'Editar' : 'Nueva'}<Text style={styles.tituloBold}> Cita</Text>
           </Text>
           <Pressable
             style={styles.btnCancelar}
-            onPress={() => setModalVisible(!modalVisible)}>
+            onPress={() => {
+              setModalVisible(!modalVisible);
+              setPacienteEdit({});
+              setId('');
+              setPaciente('');
+              setPropietario('');
+              setTelefono('');
+              setFecha(new Date());
+              setEmail('');
+              setSintomas('');
+            }}>
             <Text style={styles.btnCancelarTexto}>X Cancelar</Text>
           </Pressable>
           <View style={styles.campo}>
@@ -126,7 +162,7 @@ const Formulario = ({modalVisible, setModalVisible, setPacientes, pacientes}) =>
             />
           </View>
           <Pressable style={styles.btnNuevaCita} onPress={()=>handleCita()}>
-            <Text style={styles.btnNuevaCitaTexto}>Agregar Paciente</Text>
+            <Text style={styles.btnNuevaCitaTexto}>{pacienteEdit.id ? 'Editar' : 'Agregar'} Paciente</Text>
           </Pressable>
         </ScrollView>
       </SafeAreaView>

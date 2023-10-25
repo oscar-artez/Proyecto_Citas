@@ -21,11 +21,17 @@ const App = () => {
   //Hooks
   const [modalVisible, setModalVisible] = useState(false);
   const [pacientes, setPacientes] = useState([]);
+  const [pacienteEdit, setPacienteEdit] = useState({});
 
   const nuevaCitaHandler = () => {
     console.log('nuevaCita');
   };
-
+  const pacienteEditar = (id) => {
+    const pacienteInfo = pacientes.filter(pacienteInf => pacienteInf.id === id);
+    setPacienteEdit(pacienteInfo[0]);
+    console.log('pacienteEditar', pacienteEdit);
+  };
+  
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.titulo}>
@@ -48,8 +54,10 @@ const App = () => {
           renderItem={({item}) => {
             return (
               <Paciente
-              paciente = {item.paciente}
+              item = {item}
               fecha={item.fecha}
+              setModalVisible={setModalVisible}
+              pacienteEditar={pacienteEditar}
               />
             );
           }}
@@ -60,6 +68,8 @@ const App = () => {
         setModalVisible={setModalVisible}
         setPacientes={setPacientes}
         pacientes={pacientes}
+        pacienteEdit={pacienteEdit}
+        setPacienteEdit={setPacienteEdit}
       />
     </SafeAreaView>
   );
